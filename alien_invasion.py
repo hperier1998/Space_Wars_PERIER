@@ -161,17 +161,25 @@ class AlienInvasion:
         
         # Create the full fleet of aliens.
         for row_number in range(number_rows):
-            for alien_number in range(number_aliens_x):
-                self._create_alien(alien_number, row_number)
+            result = row_number % 2
+            if result != 0:
+                image = pygame.image.load('images/alien1.png')
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number,image)
+            elif result == 0:
+                image = pygame.image.load('images/alien2.png')
+                for alien_number in range(number_aliens_x):
+                    self._create_alien(alien_number, row_number,image)
 
-    def _create_alien(self, alien_number, row_number):
-        """Create an alien and place it in the row."""
-        alien = Alien(self)
-        alien_width, alien_height = alien.rect.size
-        alien.x = alien_width + 2 * alien_width * alien_number
-        alien.rect.x = alien.x
-        alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number
-        self.aliens.add(alien)
+    def _create_alien(self, alien_number, row_number, image):
+            """Create an alien and place it in the row."""
+            alien = Alien(self)
+            alien.image = image
+            alien_width, alien_height = alien.rect.size
+            alien.x = alien_width + 2 * alien_width * alien_number
+            alien.rect.x = alien.x
+            alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number
+            self.aliens.add(alien)
 
     def _check_fleet_edges(self):
         """Respond appropriately if any aliens have reached an edge."""
