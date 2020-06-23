@@ -8,6 +8,7 @@ from game_stats import GameStats
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
+from point import Score
 
 
 class AlienInvasion:
@@ -31,6 +32,10 @@ class AlienInvasion:
         self.aliens = pygame.sprite.Group()
 
         self._create_fleet()
+
+        self.score = Score(self)
+
+        self.score.scoring()
 
     def run_game(self):
         """Start the main loop for the game."""
@@ -96,6 +101,11 @@ class AlienInvasion:
         collisions = pygame.sprite.groupcollide(
                 self.bullets, self.aliens, True, True)
 
+        if collisions:
+            for aliens in collisions.values():
+                self.stats.score += self.settings.alien_points * len(aliens)
+            self.score.scoring() 
+
         if not self.aliens:
             # Destroy existing bullets and create new fleet.
             self.bullets.empty()
@@ -128,6 +138,14 @@ class AlienInvasion:
     def _ship_hit(self):
         """Respond to the ship being hit by an alien."""
         if self.stats.ships_left > 0:
+
+            savescore = self.stats.score
+
+            with open('score_history.txt', 'a', encoding = 'utf-8') as file:
+                file.write(f'Score: {savescore}\n')  
+
+            self.stats.reset_stats()
+            
             # Decrement ships_left.
             self.stats.ships_left -= 1
             
@@ -155,8 +173,7 @@ class AlienInvasion:
         
         # Determine the number of rows of aliens that fit on the screen.
         ship_height = self.ship.rect.height
-        available_space_y = (self.settings.screen_height -
-                                (3 * alien_height) - ship_height)
+        available_space_y = (self.settings.screen_height - (3 * alien_height) - ship_height)
         number_rows = available_space_y // (2 * alien_height)
         
         # Create the full fleet of aliens.
@@ -202,8 +219,9 @@ class AlienInvasion:
             bullet.draw_bullet()
         self.aliens.draw(self.screen)
 
-        pygame.display.flip()
+        self.score.display_score()
 
+        pygame.display.flip()
 
 if __name__ == '__main__':
     # Make a game instance, and run the game.
